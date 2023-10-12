@@ -7,3 +7,5 @@
 /App/bin/Debug/net6.0
 /WebAPI/bin/Debug/net6.0
 /WebAPI/obj
+/.vs/ProjectEvaluation
+/WebAPI/Migrations
