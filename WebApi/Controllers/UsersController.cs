@@ -22,9 +22,9 @@ public class UsersController : ControllerBase
 
     [HttpGet]
     [Route("get")]
-    public IActionResult GetAll()
+    public IActionResult GetAll(int limit = 10, string? keyword = null, int page = 1)
     {
-        var users = _userService.GetAll();
+        var users = _userService.GetAll(limit, keyword, page);
         return Ok(users);
     }
 
