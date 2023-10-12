@@ -23,7 +23,6 @@ namespace WebApi.Services
     {
         private DataContext _context;
         private readonly IMapper _mapper;
-        private const int workFactorHash = 13;
 
         public UserService(
             DataContext context,
