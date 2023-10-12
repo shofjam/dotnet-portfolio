@@ -3,6 +3,9 @@ using WebApi.Helpers;
 using WebApi.Models.Users;
 
 using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using bCrypt = BCrypt.Net.BCrypt;
+using System.Net;
 
 namespace WebApi.Services
 {
@@ -10,8 +13,9 @@ namespace WebApi.Services
     {
         IEnumerable<User> GetAll();
         User GetById(int id);
-        void Create(CreateModel model);
-        void Update(int id, UpdateModel model);
+        void Create(CreateModel payload);
+        void Update(User oldData, UpdateModel newData);
+        IActionResult ChangePassword(User data, ChangePasswordModel payload);
         void Delete(int id);
     }
 
@@ -19,6 +23,7 @@ namespace WebApi.Services
     {
         private DataContext _context;
         private readonly IMapper _mapper;
+        private const int workFactorHash = 13;
 
         public UserService(
             DataContext context,
@@ -48,29 +53,40 @@ namespace WebApi.Services
             var user = _mapper.Map<User>(model);
 
             // hash password
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            user.PasswordHash = bCrypt.HashPassword(model.Password);
 
             // save user
             _context.Users.Add(user);
             _context.SaveChanges();
         }
 
-        public void Update(int id, UpdateModel model)
+        public void Update(User oldData, UpdateModel newData)
         {
-            var user = getUser(id);
-
             // validate
-            if (model.Email != user.Email && _context.Users.Any(x => x.Email == model.Email))
-                throw new AppException("User with the email '" + model.Email + "' already exists", true);
-
-            // hash password if it was entered
-            if (!string.IsNullOrEmpty(model.Password))
-                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
+            if (newData.Email != oldData.Email && _context.Users.Any(x => x.Email == newData.Email))
+                throw new AppException("User with the email '" + newData.Email + "' already exists");
 
             // copy model to user and save
-            _mapper.Map(model, user);
-            _context.Users.Update(user);
+            _mapper.Map(newData, oldData);
+            _context.Users.Update(oldData);
             _context.SaveChanges();
+        }
+
+        public IActionResult ChangePassword(User data, ChangePasswordModel payload)
+        {
+            try
+            {
+                data.PasswordHash = bCrypt.ValidateAndReplacePassword(payload.OldPassword, data.PasswordHash, payload.NewPassword);
+            }
+            catch
+            {
+                return new BadRequestObjectResult(new { message = "Invalid Password" });
+            }
+
+            _context.Users.Update(data);
+            _context.SaveChanges();
+
+            return new OkObjectResult(new { message = "Password Changed" });
         }
 
         public void Delete(int id)

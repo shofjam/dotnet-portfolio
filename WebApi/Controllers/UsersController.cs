@@ -32,8 +32,13 @@ public class UsersController : ControllerBase
     [Route("get-by-id")]
     public IActionResult GetById(int id)
     {
-        var user = _userService.GetById(id);
-        return Ok(user);
+        var result = _userService.GetById(id);
+        if (result == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(result);
     }
 
     [HttpPost]
@@ -46,10 +51,29 @@ public class UsersController : ControllerBase
 
     [HttpPut]
     [Route("update")]
-    public IActionResult Update(int id, UpdateModel model)
+    public IActionResult Update(int id, UpdateModel payload)
     {
-        _userService.Update(id, model);
+        var oldData = _userService.GetById(id);
+        if (oldData == null)
+        {
+            return NotFound();
+        }
+
+        _userService.Update(oldData, payload);
         return Ok(new { message = "User updated" });
+    }
+
+    [HttpPost]
+    [Route("change-password")]
+    public IActionResult ChangePassword(int id, ChangePasswordModel payload)
+    {
+        var data = _userService.GetById(id);
+        if (data == null)
+        {
+            return NotFound();
+        }
+
+        return _userService.ChangePassword(data, payload);
     }
 
     [HttpDelete]
