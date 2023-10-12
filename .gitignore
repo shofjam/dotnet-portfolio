@@ -5,3 +5,5 @@
 /.vs/dotnet-portfolio
 /App/obj
 /App/bin/Debug/net6.0
+/WebAPI/bin/Debug/net6.0
+/WebAPI/obj
