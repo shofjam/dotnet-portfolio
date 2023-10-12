@@ -1,0 +1,7 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/dotnet-portfolio
+/App/obj
+/App/bin/Debug/net6.0
