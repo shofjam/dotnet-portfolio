@@ -11,7 +11,7 @@ namespace WebApi.Services
 {
     public interface IUserService
     {
-        IEnumerable<User> GetAll(int limit = 10, string? keyword = null, int page = 1);
+        IEnumerable<User> GetAll(string? keyword);
         User GetById(int id);
         void Create(CreateModel payload);
         void Update(User oldData, UpdateModel newData);
@@ -32,19 +32,16 @@ namespace WebApi.Services
             _mapper = mapper;
         }
 
-        public IEnumerable<User> GetAll(int limit = 10, string? keyword = null, int page = 1)
+        public IEnumerable<User> GetAll(string? keyword)
         {
-            IEnumerable<User> result = new List<User>();
             if (!string.IsNullOrWhiteSpace(keyword))
             {
-                result = _context.Users.Where(x => x.FirstName.ToLower().Contains(keyword.ToLower().Trim()) || x.LastName.ToLower().Contains(keyword.ToLower().Trim())).ToList();
+                return _context.Users.Where(x => x.FirstName.ToLower().Contains(keyword.ToLower().Trim()) || x.LastName.ToLower().Contains(keyword.ToLower().Trim())).ToList();
             }
             else
             {
-                result = _context.Users;
+                return _context.Users;
             }
-
-            return result.Skip(limit * (page - 1)).Take(limit);
         }
 
         public User GetById(int id)

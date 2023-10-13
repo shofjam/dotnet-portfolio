@@ -27,8 +27,15 @@ public class UsersController : ControllerBase
     {
         try
         {
-            var users = _userService.GetAll(limit, keyword, page);
-            return Ok(users);
+            var users = _userService.GetAll(keyword);
+            return Ok(
+                new 
+                { 
+                    totalRecords = users.Count(), 
+                    totalPages = Math.Ceiling((decimal)users.Count() / limit), 
+                    data = users.Skip(limit * (page - 1)).Take(limit)
+                }
+            );
         }
         catch(AppException ex)
         {
